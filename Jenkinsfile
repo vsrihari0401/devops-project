@@ -16,7 +16,7 @@ pipeline {
         // Replace 'docker-hub-credentials' with the ID of your Jenkins Credential (Username and Password)
         DOCKER_HUB_CREDENTIAL_ID = 'admin' 
         // --- Dynamic Variables ---
-        IMAGE_NAME = 'tomcat-webapp'
+        IMAGE_NAME = 'username/imagename'
         IMAGE_TAG = "${env.BUILD_ID}"
         FULL_IMAGE_NAME = "${DOCKER_HUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}"
     }

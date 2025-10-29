@@ -130,27 +130,30 @@ pipeline {
         // ------------------------------------------------------------------
         // Stage 6: Run a Container
         // ------------------------------------------------------------------
-        stage('Run Container') {
-            steps {
-                // Define the container name
-                def containerName = "${IMAGE_NAME}-latest"
+      stage('Run Container') {
+    steps {
+        script { // <--- START the Groovy script block
+            // This is now valid Groovy syntax inside the script block
+            def containerName = "${IMAGE_NAME}-latest"
 
-                // Stop and remove any pre-existing container before running the new one
-                sh "docker stop ${containerName} || true"
-                sh "docker rm ${containerName} || true"
-                
-                // Run the new container (example: mapping internal port 8080 to host port 80)
-                sh "docker run -d --name ${containerName} -p 80:8080 ${FULL_IMAGE_NAME}"
-                sh "echo 'New container ${containerName} started successfully.'" 
-            }
-            post {
-                success {
-                    echo "✅ STAGE 6 SUCCESS: Application container is running."
-                }
-                failure {
-                    error "❌ STAGE 6 FAILURE: Failed to start the application container. Check port binding or image."
-                }
-            }
+            // Subsequent shell steps can use this Groovy variable
+            sh "echo 'Stopping and removing old container ${containerName}...' "
+            sh "docker stop ${containerName} || true"
+            sh "docker rm ${containerName} || true"
+            
+            sh "docker run -d --name ${containerName} -p 80:80 ${FULL_IMAGE_NAME}"
+            sh "echo 'New container ${containerName} started successfully.'" 
+        } // <--- END the Groovy script block
+    }
+    post {
+        success {
+            echo "✅ STAGE 6 SUCCESS: Application container is running."
         }
+        failure {
+            error "❌ STAGE 6 FAILURE: Failed to start the application container. Check port binding."
+        }
+    }
+}
+    
     }
 }

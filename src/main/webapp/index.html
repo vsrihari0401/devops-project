@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Clone</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        /* --- CSS Styling --- */
+        :root {
+            --yt-red: #ff0000;
+            --yt-dark: #212121;
+            --yt-gray: #f9f9f9;
+            --yt-border: #ccc;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Roboto, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--yt-gray);
+            color: var(--yt-dark);
+            overflow-x: hidden;
+        }
+
+        /* --- Header (Navbar) --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            height: 56px;
+            background-color: white;
+            border-bottom: 1px solid var(--yt-border);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 100;
+        }
+
+        .left-section, .right-section {
+            display: flex;
+            align-items: center;
+        }
+
+        .menu-icon, .search-icon, .header-icon {
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background 0.2s;
+            color: #606060;
+        }
+        .menu-icon:hover, .search-icon:hover, .header-icon:hover {
+            background-color: #eee;
+        }
+
+        .youtube-logo {
+            color: var(--yt-dark);
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-left: 10px;
+        }
+        .youtube-logo span {
+            color: var(--yt-red);
+        }
+
+        .middle-section {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+            max-width: 650px;
+            margin: 0 40px;
+        }
+
+        .search-input {
+            flex-grow: 1;
+            padding: 10px 15px;
+            border: 1px solid var(--yt-border);
+            border-right: none;
+            border-radius: 40px 0 0 40px;
+            font-size: 1rem;
+            outline: none;
+            height: 40px;
+        }
+
+        .search-btn {
+            background-color: #f8f8f8;
+            border: 1px solid var(--yt-border);
+            padding: 0 20px;
+            border-radius: 0 40px 40px 0;
+            cursor: pointer;
+            height: 40px;
+        }
+
+        /* --- Main Content Layout --- */
+        .content-area {
+            display: flex;
+            padding-top: 56px; /* Space for fixed header */
+        }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            width: 240px;
+            background-color: white;
+            position: fixed;
+            top: 56px;
+            left: 0;
+            bottom: 0;
+            padding-top: 10px;
+            overflow-y: auto;
+            transition: width 0.3s, transform 0.3s;
+            z-index: 90;
+        }
+
+        /* Compact Sidebar when collapsed */
+        .sidebar.collapsed {
+            width: 72px;
+            padding-top: 0;
+        }
+        
+        .sidebar.collapsed .sidebar-link span {
+            display: none;
+        }
+        
+        .sidebar.collapsed .sidebar-link {
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 15px 0;
+            font-size: 0.6rem;
+        }
+        .sidebar.collapsed .sidebar-link .material-icons {
+            margin-right: 0;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 10px 24px;
+            font-size: 0.9rem;
+            color: var(--yt-dark);
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+        .sidebar-link:hover {
+            background-color: #eee;
+        }
+        .sidebar-link.active {
+            background-color: #f0f0f0;
+            font-weight: 700;
+        }
+
+        .sidebar-link .material-icons {
+            margin-right: 24px;
+            font-size: 1.5rem;
+        }
+
+        .sidebar hr {
+            border: 0;
+            border-top: 1px solid var(--yt-border);
+            margin: 10px 0;
+        }
+
+        /* --- Video Grid (Main Content) --- */
+        .video-grid {
+            flex-grow: 1;
+            padding: 25px 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px 16px;
+            margin-left: 240px; /* Space for the default sidebar */
+            transition: margin-left 0.3s;
+        }
+        
+        .video-grid.collapsed-margin {
+            margin-left: 72px; /* Space for the collapsed sidebar */
+        }
+
+        .video-card {
+            background-color: white;
+        }
+
+        .thumbnail-container {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            margin-bottom: 10px;
+            overflow: hidden;
+            border-radius: 8px;
+        }
+
+        .thumbnail {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-info-grid {
+            display: flex;
+        }
+
+        .channel-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            margin-right: 10px;
+            flex-shrink: 0;
+            background-color: #ccc; /* Placeholder color */
+        }
+
+        .video-details h3 {
+            font-size: 1rem;
+            font-weight: 500;
+            line-height: 1.4;
+            margin-bottom: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .video-details p {
+            color: #606060;
+            font-size: 0.85rem;
+            line-height: 1.2;
+        }
+
+        /* Hide search in middle for small screens */
+        @media (max-width: 768px) {
+            .middle-section {
+                display: none;
+            }
+            .video-grid {
+                margin-left: 0 !important; /* Overwrite JS margin for mobile view */
+                padding: 15px;
+            }
+            .sidebar {
+                transform: translateX(-240px); /* Hide full sidebar off-screen */
+                box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+            }
+            .sidebar.active {
+                transform: translateX(0); /* Slide in when active */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="left-section">
+            <span class="material-icons menu-icon" id="menuToggle">menu</span>
+            <div class="youtube-logo">You<span>Tube</span></div>
+        </div>
+
+        <div class="middle-section">
+            <input type="text" class="search-input" placeholder="Search">
+            <button class="search-btn">
+                <span class="material-icons search-icon">search</span>
+            </button>
+        </div>
+
+        <div class="right-section">
+            <span class="material-icons header-icon">videocam</span>
+            <span class="material-icons header-icon">notifications</span>
+            <div class="channel-avatar" style="margin-left: 15px;"></div>
+        </div>
+    </header>
+
+    <div class="content-area">
+
+        <div class="sidebar" id="sidebar">
+            <a href="#" class="sidebar-link active"><span class="material-icons">home</span><span>Home</span></a>
+            <a href="#" class="sidebar-link"><span class="material-icons">explore</span><span>Explore</span></a>
+            <a href="#" class="sidebar-link"><span class="material-icons">subscriptions</span><span>Subscriptions</span></a>
+            <hr>
+            <a href="#" class="sidebar-link"><span class="material-icons">video_library</span><span>Library</span></a>
+            <a href="#" class="sidebar-link"><span class="material-icons">history</span><span>History</span></a>
+            <hr>
+            <p style="padding: 0 24px; font-size: 0.9rem; color: #606060;">SUBSCRIPTIONS</p>
+            <a href="#" class="sidebar-link"><span class="material-icons">person</span><span>Channel One</span></a>
+            <a href="#" class="sidebar-link"><span class="material-icons">person</span><span>Channel Two</span></a>
+            <a href="#" class="sidebar-link"><span class="material-icons">person</span><span>Channel Three</span></a>
+        </div>
+
+        <div class="video-grid" id="videoGrid">
+            <div class="video-card">
+                <div class="thumbnail-container">
+                    <img class="thumbnail" src="https://picsum.photos/id/1/320/180" alt="Video Thumbnail">
+                </div>
+                <div class="video-info-grid">
+                    <div class="channel-avatar"></div>
+                    <div class="video-details">
+                        <h3>Clone War: The Full Stack Application in a Single HTML File</h3>
+                        <p>Web Development Expert</p>
+                        <p>1.2M views • 2 weeks ago</p>
+                    </div>
+                </div>
+            </div>
+            <div class="video-card">
+                <div class="thumbnail-container">
+                    <img class="thumbnail" src="https://picsum.photos/id/10/320/180" alt="Video Thumbnail">
+                </div>
+                <div class="video-info-grid">
+                    <div class="channel-avatar"></div>
+                    <div class="video-details">
+                        <h3>Using CSS Grid for Responsive App Layouts</h3>
+                        <p>Coding Tutorials</p>
+                        <p>500K views • 1 month ago</p>
+                    </div>
+                </div>
+            </div>
+            <div class="video-card">
+                <div class="thumbnail-container">
+                    <img class="thumbnail" src="https://picsum.photos/id/100/320/180" alt="Video Thumbnail">
+                </div>
+                <div class="video-info-grid">
+                    <div class="channel-avatar"></div>
+                    <div class="video-details">
+                        <h3>JavaScript Secrets: Local Storage and Persistence</h3>
+                        <p>JS Masters</p>
+                        <p>2M views • 3 days ago</p>
+                    </div>
+                </div>
+            </div>
+            <div class="video-card">
+                <div class="thumbnail-container">
+                    <img class="thumbnail" src="https://picsum.photos/id/1000/320/180" alt="Video Thumbnail">
+                </div>
+                <div class="video-info-grid">
+                    <div class="channel-avatar"></div>
+                    <div class="video-details">
+                        <h3>Build a Simple Calculator with HTML and CSS</h3>
+                        <p>Front-End Basics</p>
+                        <p>80K views • 5 hours ago</p>
+                    </div>
+                </div>
+            </div>
+            <div class="video-card">
+                <div class="thumbnail-container">
+                    <img class="thumbnail" src="https://picsum.photos/id/1002/320/180" alt="Video Thumbnail">
+                </div>
+                <div class="video-info-grid">
+                    <div class="channel-avatar"></div>
+                    <div class="video-details">
+                        <h3>Testing the Limits of Single-File Web Apps</h3>
+                        <p>One-File Dev</p>
+                        <p>15K views • 1 day ago</p>
+                    </div>
+                </div>
+            </div>
+            <div class="video-card">
+                <div class="thumbnail-container">
+                    <img class="thumbnail" src="https://picsum.photos/id/1003/320/180" alt="Video Thumbnail">
+                </div>
+                <div class="video-info-grid">
+                    <div class="channel-avatar"></div>
+                    <div class="video-details">
+                        <h3>Best Travel Destinations of 2025</h3>
+                        <p>Travel Vlogger</p>
+                        <p>3.1M views • 1 month ago</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- JavaScript Functionality ---
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const videoGrid = document.getElementById('videoGrid');
+        
+        // Define the state of the sidebar
+        let isSidebarCollapsed = false;
+
+        menuToggle.addEventListener('click', () => {
+            // Toggle the collapsed state
+            isSidebarCollapsed = !isSidebarCollapsed;
+
+            if (isSidebarCollapsed) {
+                // Collapse the sidebar to the mini-view
+                sidebar.classList.add('collapsed');
+                videoGrid.classList.add('collapsed-margin');
+            } else {
+                // Expand the sidebar to the full-view
+                sidebar.classList.remove('collapsed');
+                videoGrid.classList.remove('collapsed-margin');
+            }
+            
+            // For mobile view, simply toggle the 'active' class to slide it in/out
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('active');
+                // On mobile, the grid margin is always 0, no need to adjust
+            }
+        });
+        
+        // Initial setup for responsiveness
+        function adjustLayout() {
+            if (window.innerWidth <= 768) {
+                // Mobile view: Ensure sidebar is initially hidden and grid has no left margin
+                sidebar.classList.remove('collapsed');
+                videoGrid.classList.remove('collapsed-margin');
+                isSidebarCollapsed = false; // Reset state for mobile
+            } else {
+                 // Desktop view: Ensure default full sidebar view
+                sidebar.classList.remove('active');
+            }
+        }
+        
+        window.addEventListener('resize', adjustLayout);
+        adjustLayout(); // Run on load
+    </script>
+</body>
+</html>

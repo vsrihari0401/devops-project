@@ -14,9 +14,9 @@ pipeline {
         // Replace with your actual Docker Hub username
         DOCKER_HUB_USER = 'vsrihari01' 
         // Replace 'docker-hub-credentials' with the ID of your Jenkins Credential (Username and Password)
-        DOCKER_HUB_CREDENTIAL_ID = '' 
+        DOCKER_HUB_CREDENTIAL_ID = 'admin' 
         // --- Dynamic Variables ---
-        IMAGE_NAME = 'nginx'
+        IMAGE_NAME = 'tomcat-webapp'
         IMAGE_TAG = "${env.BUILD_ID}"
         FULL_IMAGE_NAME = "${DOCKER_HUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}"
     }
@@ -53,7 +53,7 @@ pipeline {
                 script {
                     // Build the Docker image using the artifact created by Maven
                     sh 'echo "Building Docker image..."'
-                    def dockerImage = docker.build("${nginx}", '.') 
+                    def dockerImage = docker.build("${IMAGE_NAME}", '.') 
                     env.DOCKER_IMAGE_ID = dockerImage.id
                 }
             }
